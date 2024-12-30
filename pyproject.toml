@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "terminal-app"
+version = "0.1.0"
+description = ""
+authors = ["Doonu <DonuSuzerain@yandex.ru>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+fastapi = "^0.115.2"
+uvicorn = {extras = ["standard"], version = "^0.32.0"}
+sqlalchemy = {extras = ["asynio"], version = "^2.0.36"}
+asyncpg = "^0.29.0"
+pydantic-settings = "^2.6.0"
+alembic = "^1.13.3"
+python-dotenv = "^1.0.1"
+pyjwt = {extras = ["crypto"], version = "^2.10.0"}
+bcrypt = "^4.2.1"
+email-validator = "^2.2.0"
+python-multipart = "^0.0.17"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.3"
+black = "^24.10.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
