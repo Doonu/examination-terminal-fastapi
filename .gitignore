@@ -1,0 +1,6 @@
+.idea
+
+.env.dev
+.env.prod
+
+certs
