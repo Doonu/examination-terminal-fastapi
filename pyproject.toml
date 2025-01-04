@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "terminal-app"
+name = "examenation-terminal"
 version = "0.1.0"
 description = ""
 authors = ["Doonu <DonuSuzerain@yandex.ru>"]
