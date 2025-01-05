@@ -2,7 +2,6 @@ from fastapi import APIRouter, Depends
 from fastapi.security import HTTPBearer
 from sqlalchemy import select, Result
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload
 
 
 from ..auth.dependencies import (
@@ -13,7 +12,7 @@ from ..auth.dependencies import (
     create_access_token,
 )
 from ..auth.schemas import AuthBase
-from core.models import User, db_helper, Profile
+from core.models import User, db_helper
 
 http_bearer = HTTPBearer()
 router = APIRouter(tags=["Auth"])
@@ -33,14 +32,6 @@ async def auth_registration(user: User = Depends(register_user)):
 async def auth_refresh(user: User = Depends(get_current_auth_user_for_refresh)):
     access_token = await create_access_token(user=user)
     return AuthBase(access_token=access_token, token_type="Bearer")
-
-
-@router.get("/profile")
-async def pf(session: AsyncSession = Depends(db_helper.scoped_session_dependency)):
-    state = select(Profile).options(joinedload(Profile.role)).order_by(Profile.id)
-    result: Result = await session.execute(state)
-    profiles = result.scalars().all()
-    return list(profiles)
 
 
 @router.get("/")
