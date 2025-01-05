@@ -95,12 +95,18 @@ async def get_current_token_payload(
     return payload
 
 
+async def get_user_id_in_access_token(
+    payload: dict = Depends(get_current_token_payload),
+) -> int:
+    return payload.get("user_id")
+
+
 async def get_current_auth_user_for_refresh(
     payload: dict = Depends(get_current_token_payload),
     session: AsyncSession = Depends(db_helper.scoped_session_dependency),
 ) -> User:
     validate_token_type(token_type=REFRESH_TOKEN_TYPE, payload=payload)
-    user_id: int = payload.get("user_id")
+    user_id: int = await get_user_id_in_access_token(payload=payload)
     user = await auth_crud.get_item_user_by_id(session=session, user_id=user_id)
 
     if user is not None:

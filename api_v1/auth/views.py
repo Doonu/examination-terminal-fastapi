@@ -13,7 +13,7 @@ from ..auth.dependencies import (
     create_access_token,
 )
 from ..auth.schemas import AuthBase
-from core.models import User, db_helper, Profile, Role
+from core.models import User, db_helper, Profile
 
 http_bearer = HTTPBearer()
 router = APIRouter(tags=["Auth"])
@@ -33,21 +33,6 @@ async def auth_registration(user: User = Depends(register_user)):
 async def auth_refresh(user: User = Depends(get_current_auth_user_for_refresh)):
     access_token = await create_access_token(user=user)
     return AuthBase(access_token=access_token, token_type="Bearer")
-
-
-@router.get("/role")
-async def auth(session: AsyncSession = Depends(db_helper.scoped_session_dependency)):
-    state = select(Role).order_by(Role.id)
-    result: Result = await session.execute(state)
-    users = result.scalars().all()
-    return list(users)
-
-
-@router.post("/role")
-async def auth(session: AsyncSession = Depends(db_helper.scoped_session_dependency)):
-    role = Role(name="Студент")
-    session.add(role)
-    await session.commit()
 
 
 @router.get("/profile")
