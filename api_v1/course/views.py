@@ -1,3 +1,5 @@
+from typing import List
+
 from fastapi import APIRouter, Depends, Form
 from fastapi.security import HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -60,12 +62,12 @@ async def delete_course(
 
 @router.post("/{course_id}/add_student")
 async def add_student_in_course(
-    student_id: int,
+    student_ids: List[int],
     course: CourseGet = Depends(get_course_by_id),
     session: AsyncSession = Depends(db_helper.scoped_session_dependency),
 ):
     return await course_crud.add_student_in_course(
-        course=course, session=session, student_id=student_id
+        course=course, session=session, student_ids=student_ids
     )
 
 

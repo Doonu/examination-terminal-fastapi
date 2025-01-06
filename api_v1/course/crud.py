@@ -1,3 +1,5 @@
+from typing import Union
+
 from fastapi import HTTPException
 from sqlalchemy import select, Result
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -47,10 +49,17 @@ async def update_course(
     return course
 
 
-async def add_student_in_course(student_id: int, session: AsyncSession, course):
-    student = await crud_profile.get_profile(session=session, user_id=student_id)
+async def add_student_in_course(
+    student_ids: Union[int, list[int]], session: AsyncSession, course
+):
+    students = [
+        await crud_profile.get_profile(session=session, user_id=single_id)
+        for single_id in student_ids
+    ]
 
-    course.students.append(CourseStudentAssociation(student=student))
+    for student in students:
+        course.students.append(CourseStudentAssociation(student=student))
+
     await session.commit()
 
 
