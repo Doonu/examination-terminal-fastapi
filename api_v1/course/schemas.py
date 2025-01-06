@@ -28,3 +28,8 @@ class CourseGet(Course):
         if not value:
             return []
         return [assoc.student for assoc in value]
+
+
+class CourseUpdatePartial(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
