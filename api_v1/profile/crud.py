@@ -1,6 +1,7 @@
 from typing import Optional
 
 from fastapi import Depends
+from pydantic import EmailStr
 from sqlalchemy import select, Result
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
@@ -9,8 +10,8 @@ from api_v1.profile.schemas import ProfileGet, ProfileUpdate
 from core.models import Profile, db_helper
 
 
-async def create_profile(session: AsyncSession, role_id: int):
-    profile = Profile(email="user@example.com", role_id=role_id)
+async def create_profile(session: AsyncSession, role_id: int, email: EmailStr):
+    profile = Profile(email=email, role_id=role_id)
     session.add(profile)
     await session.commit()
     return profile

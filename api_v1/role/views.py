@@ -5,8 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from api_v1.role import crud
 from core.models import db_helper
 
-http_bearer = HTTPBearer()
-router = APIRouter(tags=["Role"], dependencies=[Depends(http_bearer)])
+router = APIRouter(tags=["Role"])
 
 
 @router.get("/")

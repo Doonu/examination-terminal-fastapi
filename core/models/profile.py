@@ -8,6 +8,7 @@ from .base import Base
 if TYPE_CHECKING:
     from .user import User
     from .role import Role
+    from .course_student import CourseStudentAssociation
 
 
 class Profile(Base):
@@ -23,4 +24,6 @@ class Profile(Base):
     role: Mapped["Role"] = relationship("Role", lazy="joined")
 
     user: Mapped["User"] = relationship(back_populates="profile")
-
+    courses: Mapped[list["CourseStudentAssociation"]] = relationship(
+        back_populates="student"
+    )

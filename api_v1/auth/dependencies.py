@@ -60,7 +60,9 @@ async def register_user(
         )
 
     base_role = await auth_crud.get_role_by_name(session=session, name="Студент")
-    profile = await profile_crud.create_profile(session=session, role_id=base_role.id)
+    profile = await profile_crud.create_profile(
+        session=session, email=email, role_id=base_role.id
+    )
 
     hashed_password = hash_password(password_user=password)
     return await auth_crud.create_user(
@@ -106,7 +108,7 @@ async def get_current_auth_user_for_refresh(
     session: AsyncSession = Depends(db_helper.scoped_session_dependency),
 ) -> User:
     validate_token_type(token_type=REFRESH_TOKEN_TYPE, payload=payload)
-    user_id: int = await get_user_id_in_access_token(payload=payload)
+    user_id = await get_user_id_in_access_token(payload=payload)
     user = await auth_crud.get_item_user_by_id(session=session, user_id=user_id)
 
     if user is not None:
