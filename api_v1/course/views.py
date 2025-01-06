@@ -50,12 +50,31 @@ async def update_course(
     )
 
 
+@router.delete("/{course_id}")
+async def delete_course(
+    course: CourseGet = Depends(get_course_by_id),
+    session: AsyncSession = Depends(db_helper.scoped_session_dependency),
+):
+    return await course_crud.delete_course(course=course, session=session)
+
+
 @router.post("/{course_id}/add_student")
-async def add_student_course(
+async def add_student_in_course(
     student_id: int,
     course: CourseGet = Depends(get_course_by_id),
     session: AsyncSession = Depends(db_helper.scoped_session_dependency),
 ):
     return await course_crud.add_student_in_course(
         course=course, session=session, student_id=student_id
+    )
+
+
+@router.post("/{course_id}/delete_student")
+async def delete_student_in_course(
+    student_id: int,
+    course: CourseGet = Depends(get_course_by_id),
+    session: AsyncSession = Depends(db_helper.scoped_session_dependency),
+):
+    return await course_crud.delete_student_in_course(
+        student_id=student_id, session=session, course=course
     )

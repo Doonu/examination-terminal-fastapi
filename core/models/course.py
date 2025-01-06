@@ -18,5 +18,5 @@ class Course(Base):
     teacher: Mapped["Profile"] = relationship("Profile", lazy="joined")
 
     students: Mapped[list["CourseStudentAssociation"]] = relationship(
-        back_populates="course"
+        back_populates="course", cascade="all, delete-orphan"
     )

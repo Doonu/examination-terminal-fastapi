@@ -52,3 +52,21 @@ async def add_student_in_course(student_id: int, session: AsyncSession, course):
 
     course.students.append(CourseStudentAssociation(student=student))
     await session.commit()
+
+
+async def delete_student_in_course(student_id: int, session: AsyncSession, course):
+    student = await crud_profile.get_profile(session=session, user_id=student_id)
+    association_to_remove = next(
+        (assoc for assoc in course.students if assoc.profile_id == student.id), None
+    )
+
+    await session.delete(association_to_remove)
+    await session.commit()
+
+
+async def delete_course(
+    course: CourseGet,
+    session: AsyncSession,
+):
+    await session.delete(course)
+    await session.commit()
