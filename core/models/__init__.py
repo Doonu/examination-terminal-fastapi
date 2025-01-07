@@ -5,6 +5,8 @@ __all__ = (
     "CourseStudentAssociation",
     "User",
     "Role",
+    "Test",
+    "CourseTestAssociation",
     "DatabaseHelper",
     "db_helper",
 )
@@ -16,3 +18,5 @@ from .profile import Profile
 from .db_helper import db_helper, DatabaseHelper
 from .course import Course
 from .course_student import CourseStudentAssociation
+from .course_test import CourseTestAssociation
+from .test import Test

@@ -8,6 +8,7 @@ from core.models import Base
 if TYPE_CHECKING:
     from .profile import Profile
     from .course_student import CourseStudentAssociation
+    from .course_test import CourseTestAssociation
 
 
 class Course(Base):
@@ -18,5 +19,8 @@ class Course(Base):
     teacher: Mapped["Profile"] = relationship("Profile", lazy="joined")
 
     students: Mapped[list["CourseStudentAssociation"]] = relationship(
+        back_populates="course", cascade="all, delete-orphan"
+    )
+    tests: Mapped[list["CourseTestAssociation"]] = relationship(
         back_populates="course", cascade="all, delete-orphan"
     )

@@ -1,7 +1,8 @@
-from typing import Optional, List
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, field_validator
 
+from api_v1.course_test.schemas import Test
 from api_v1.profile.schemas import ProfileGet
 
 
@@ -21,6 +22,7 @@ class Course(CourseBase):
 
 class CourseGet(Course):
     students: Optional[list[ProfileGet]] = []
+    tests: Optional[list[Test]] = []
 
     @field_validator("students", mode="before")
     @classmethod
@@ -28,6 +30,13 @@ class CourseGet(Course):
         if not value:
             return []
         return [assoc.student for assoc in value]
+
+    @field_validator("tests", mode="before")
+    @classmethod
+    def flatten_tests(cls, value):
+        if not value:
+            return []
+        return [assoc.test for assoc in value]
 
 
 class CourseUpdatePartial(BaseModel):

@@ -60,6 +60,17 @@ async def delete_course(
     return await course_crud.delete_course(course=course, session=session)
 
 
+@router.post("/{course_id}/add_test")
+async def add_test_in_course(
+    tests_ids: List[int],
+    course: CourseGet = Depends(get_course_by_id),
+    session: AsyncSession = Depends(db_helper.scoped_session_dependency),
+):
+    return await course_crud.add_test_in_course(
+        session=session, course=course, tests_ids=tests_ids
+    )
+
+
 @router.post("/{course_id}/add_student")
 async def add_student_in_course(
     student_ids: List[int],

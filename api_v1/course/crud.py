@@ -8,7 +8,8 @@ from starlette import status
 
 from api_v1.course.schemas import CourseGet, CourseUpdatePartial
 from api_v1.profile import crud as crud_profile
-from core.models import Course, CourseStudentAssociation
+from api_v1.course_test import crud as crud_test
+from core.models import Course, CourseStudentAssociation, CourseTestAssociation
 
 
 async def create_course(
@@ -30,6 +31,7 @@ async def get_list_course(session: AsyncSession, user_id: int) -> list[CourseGet
     state = (
         select(Course)
         .where(Course.teacher_id == user_id)
+        .options(selectinload(Course.tests).joinedload(CourseTestAssociation.test))
         .options(
             selectinload(Course.students).joinedload(CourseStudentAssociation.student)
         )
@@ -47,6 +49,20 @@ async def update_course(
 
     await session.commit()
     return course
+
+
+async def add_test_in_course(
+    tests_ids: Union[int, list[int]], session: AsyncSession, course
+):
+    tests = [
+        await crud_test.get_test(session=session, test_id=single_id)
+        for single_id in tests_ids
+    ]
+
+    for test in tests:
+        course.tests.append(CourseTestAssociation(test=test))
+
+    await session.commit()
 
 
 async def add_student_in_course(
