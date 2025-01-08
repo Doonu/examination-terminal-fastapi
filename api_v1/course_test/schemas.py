@@ -3,7 +3,7 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, field_validator
 
 from api_v1.profile.schemas import ProfileGet
-from api_v1.questions.schemas import QuestionBase
+from api_v1.questions.schemas import QuestionGet
 
 
 class TestBase(BaseModel):
@@ -20,7 +20,7 @@ class Test(TestBase):
 
 
 class TestGet(Test):
-    questions: Optional[list[QuestionBase]] = []
+    questions: Optional[list[QuestionGet]] = []
 
     @field_validator("questions", mode="before")
     @classmethod
