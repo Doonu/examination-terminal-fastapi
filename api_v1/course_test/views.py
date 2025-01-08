@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from api_v1.auth.dependencies import get_user_id_in_access_token
 from api_v1.course_test import crud as test_crud
 from api_v1.course_test.schemas import TestGet
-from api_v1.questions.schemas import QuestionBase, QuestionGet
+from api_v1.questions.schemas import QuestionGet
 from core.models import db_helper
 
 http_bearer = HTTPBearer()

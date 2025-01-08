@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from api_v1.questions.schemas import QuestionUpdatePartial
 from core.models import Question
 
 
@@ -11,4 +12,14 @@ async def create_question(session: AsyncSession, question_in):
     )
     session.add(question)
     await session.flush()
+    return question
+
+
+async def update_question(
+    question_update: QuestionUpdatePartial, session: AsyncSession, question
+):
+    for name, value in question_update.model_dump(exclude_unset=True).items():
+        setattr(question, name, value)
+
+    await session.commit()
     return question

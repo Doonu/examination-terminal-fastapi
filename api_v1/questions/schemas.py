@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from pydantic import BaseModel, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict
 
 
 class QuestionBase(BaseModel):
@@ -16,4 +16,12 @@ class Question(QuestionBase):
 
 
 class QuestionGet(QuestionBase):
-    pass
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+
+
+class QuestionUpdatePartial(BaseModel):
+    text_question: Optional[str] = None
+    options: Optional[List[str]] = []
+    correct_answer: Optional[str] = None

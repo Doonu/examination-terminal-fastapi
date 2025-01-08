@@ -1,4 +1,4 @@
-"""add question table
+"""add questions table
 
 Revision ID: 8916e5c45432
 Revises: 374ed29cc88f
