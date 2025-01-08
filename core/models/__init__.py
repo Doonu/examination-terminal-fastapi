@@ -7,6 +7,8 @@ __all__ = (
     "Role",
     "Test",
     "CourseTestAssociation",
+    "TestQuestionAssociation",
+    "Question",
     "DatabaseHelper",
     "db_helper",
 )
@@ -20,3 +22,5 @@ from .course import Course
 from .course_student import CourseStudentAssociation
 from .course_test import CourseTestAssociation
 from .test import Test
+from .test_question import TestQuestionAssociation
+from .question import Question
