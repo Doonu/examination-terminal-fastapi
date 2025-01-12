@@ -9,6 +9,7 @@ __all__ = (
     "CourseTestAssociation",
     "TestQuestionAssociation",
     "Question",
+    "TestProgress",
     "DatabaseHelper",
     "db_helper",
 )
@@ -24,3 +25,4 @@ from .course_test import CourseTestAssociation
 from .test import Test
 from .test_question import TestQuestionAssociation
 from .question import Question
+from .test_progress import TestProgress
