@@ -46,6 +46,7 @@ async def create_token(
     )
 
 
+# Добавить возможность выбирать роль
 async def register_user(
     email: EmailStr = Form(),
     password: str = Form(),

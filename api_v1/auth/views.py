@@ -34,9 +34,9 @@ async def auth_refresh(user: User = Depends(get_current_auth_user_for_refresh)):
     return AuthBase(access_token=access_token, token_type="Bearer")
 
 
-@router.get("/")
-async def auth(session: AsyncSession = Depends(db_helper.scoped_session_dependency)):
-    state = select(User).order_by(User.id)
-    result: Result = await session.execute(state)
-    users = result.scalars().all()
-    return list(users)
+# @router.get("/")
+# async def auth(session: AsyncSession = Depends(db_helper.scoped_session_dependency)):
+#     state = select(User).order_by(User.id)
+#     result: Result = await session.execute(state)
+#     users = result.scalars().all()
+#     return list(users)

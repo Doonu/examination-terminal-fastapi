@@ -5,6 +5,8 @@ from fastapi.security import HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api_v1.auth.dependencies import get_user_id_in_access_token
+from api_v1.course.dependencies import get_course_by_id
+from api_v1.course.schemas import CourseGet
 from api_v1.course_test import crud as test_crud
 from api_v1.course_test.schemas import TestGet, ResultTest
 from api_v1.questions.schemas import QuestionBase
@@ -33,9 +35,12 @@ async def get_test(
 @router.get("/{test_id}/progress_test")
 async def get_progress_test(
     test_id: int,
+    user_id: int = Depends(get_user_id_in_access_token),
     session: AsyncSession = Depends(db_helper.scoped_session_dependency),
 ):
-    return await test_crud.get_progress_test(test_id=test_id, session=session)
+    return await test_crud.get_progress_test(
+        test_id=test_id, session=session, user_id=user_id
+    )
 
 
 @router.post("/")
@@ -64,16 +69,14 @@ async def add_questions_in_test(
 @router.post("/{test_id}/access_activation")
 async def access_activation(
     test_id: int,
-    timelimit: int,
     deadline_date: int,
-    user_id: int = Depends(get_user_id_in_access_token),
+    course: CourseGet = Depends(get_course_by_id),
     session: AsyncSession = Depends(db_helper.scoped_session_dependency),
 ):
     return await test_crud.access_activation(
+        course=course,
         session=session,
         test_id=test_id,
-        user_id=user_id,
-        timelimit=timelimit,
         deadline_date=deadline_date,
     )
 
@@ -81,17 +84,19 @@ async def access_activation(
 @router.post("/{test_id}/start_test")
 async def start_test(
     test_id: int,
+    user_id: int = Depends(get_user_id_in_access_token),
     session: AsyncSession = Depends(db_helper.scoped_session_dependency),
 ):
-    return await test_crud.start_test(test_id=test_id, session=session)
+    return await test_crud.start_test(test_id=test_id, session=session, user_id=user_id)
 
 
 @router.post("/{test_id}/completion_test")
 async def completion_test(
     test_id: int,
     result_test: List[ResultTest],
+    user_id: int = Depends(get_user_id_in_access_token),
     session: AsyncSession = Depends(db_helper.scoped_session_dependency),
 ):
     return await test_crud.completion_test(
-        session=session, test_id=test_id, result_test=result_test
+        session=session, test_id=test_id, result_test=result_test, user_id=user_id
     )

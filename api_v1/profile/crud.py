@@ -1,6 +1,6 @@
 from typing import Optional
 
-from fastapi import Depends
+from fastapi import Depends, HTTPException, status
 from pydantic import EmailStr
 from sqlalchemy import select, Result
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -26,12 +26,19 @@ async def get_list_profile(
     return list(profiles)
 
 
-async def get_profile(user_id: int, session: AsyncSession) -> Optional[ProfileGet]:
+async def get_profile(user_id: int, session: AsyncSession) -> ProfileGet:
     state = (
         select(Profile).options(joinedload(Profile.role)).where(Profile.id == user_id)
     )
-    profile = await session.scalars(state)
-    return next(profile, None)
+    results = await session.scalars(state)
+    profile = next(results, None)
+
+    if profile is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Профиль не найден"
+        )
+
+    return profile
 
 
 async def update_profile(

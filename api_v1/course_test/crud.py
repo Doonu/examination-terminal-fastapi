@@ -5,9 +5,10 @@ from sqlalchemy import select, Result
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from api_v1.course.schemas import CourseGet
 from api_v1.course_test.schemas import ResultTest
 from api_v1.questions import crud as crud_question
-from core.models import Test, TestQuestionAssociation, TestProgress
+from core.models import Test, TestQuestionAssociation, TestProgress, Profile
 from core.models.test_progress import TestProgressResult
 
 
@@ -57,53 +58,49 @@ async def add_questions_in_test(
     await session.commit()
 
 
-# timelimit брать из теста
 # Делать проверку на студента
 async def access_activation(
     test_id: int,
-    user_id: int,
-    timelimit: int,
     deadline_date,
+    course: CourseGet,
     session: AsyncSession,
 ):
     test = await get_test(test_id=test_id, session=session)
-    progress_test = await get_progress_test(test_id=test_id, session=session)
 
-    if progress_test:
-        return progress_test
+    for student in course.students:
+        questions = [
+            TestProgressResult(
+                test_progress_id=test_id,
+                text_question=association.question.text_question,
+                options=association.question.options,
+                correct_answer=association.question.correct_answer,
+                student_answer=None,
+            )
+            for association in test.questions
+        ]
 
-    questions = [
-        TestProgressResult(
-            test_progress_id=test_id,
-            text_question=association.question.text_question,
-            options=association.question.options,
-            correct_answer=association.question.correct_answer,
-            student_answer=None,
+        test_progress = TestProgress(
+            test_id=test_id,
+            status=1,
+            timelimit=test.time_limit,
+            result_test=questions,
+            deadline_date=deadline_date,
+            participant_id=student.student.id,
         )
-        for association in test.questions
-    ]
+        session.add(test_progress)
 
-    test_progress = TestProgress(
-        test_id=test_id,
-        participant_id=user_id,
-        status=1,
-        timelimit=timelimit,
-        result_test=questions,
-        deadline_date=deadline_date,
-    )
-    session.add(test_progress)
     await session.commit()
-
-    return progress_test
 
 
 async def get_progress_test(
     test_id: int,
+    user_id: int,
     session: AsyncSession,
 ):
     test = await session.scalar(
         select(TestProgress)
         .where(TestProgress.test_id == test_id)
+        .where(TestProgress.participant_id == user_id)
         .options(selectinload(TestProgress.result_test))
     )
 
@@ -112,7 +109,6 @@ async def get_progress_test(
 
     if test.status == 1 and int(time.time()) > test.deadline_date:
         test.status = 4
-        test.remaining_time = 0
         return test
 
     if test.status == 1 or test.status == 3 or test.status == 4:
@@ -137,9 +133,10 @@ async def get_progress_test(
 
 async def start_test(
     test_id: int,
+    user_id: int,
     session: AsyncSession,
 ):
-    test = await get_progress_test(session=session, test_id=test_id)
+    test = await get_progress_test(session=session, test_id=test_id, user_id=user_id)
 
     if test.status != 1:
         return test
@@ -154,9 +151,9 @@ async def start_test(
 
 
 async def completion_test(
-    test_id: int, session: AsyncSession, result_test: List[ResultTest]
+    test_id: int, user_id: int, session: AsyncSession, result_test: List[ResultTest]
 ):
-    test = await get_progress_test(session=session, test_id=test_id)
+    test = await get_progress_test(session=session, test_id=test_id, user_id=user_id)
 
     if test.status != 2:
         return test

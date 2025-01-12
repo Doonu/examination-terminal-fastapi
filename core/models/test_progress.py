@@ -31,9 +31,7 @@ class TestProgress(Base):
     test_id: Mapped[int] = mapped_column(ForeignKey("test.id"), nullable=False)
     test: Mapped["Test"] = relationship("Test", lazy="joined")
 
-    participant_id: Mapped[int] = mapped_column(
-        ForeignKey("profile.id"), nullable=False
-    )
+    participant_id: Mapped[int] = mapped_column(ForeignKey("profile.id"), nullable=True)
     participant: Mapped["Profile"] = relationship("Profile", lazy="joined")
 
     created_at: Mapped[datetime] = mapped_column(
