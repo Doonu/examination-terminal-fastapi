@@ -40,3 +40,15 @@ async def get_role_by_name(session: AsyncSession, name: str) -> Role:
         )
 
     return next(role, None)
+
+
+async def get_role_by_id(session: AsyncSession, role_id: int) -> Role:
+    state = select(Role).where(Role.id == role_id)
+    role = await session.scalars(state)
+
+    if not role:
+        HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Роль не найдена"
+        )
+
+    return next(role, None)

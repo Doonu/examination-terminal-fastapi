@@ -6,14 +6,19 @@ from pathlib import Path
 from pydantic_settings import BaseSettings
 from pydantic import BaseModel
 
-env_file = ".env.prod" if os.getenv("ENV") == "prod" else ".env.dev"
+env_file = (
+    ".env.prod"
+    if os.getenv("ENV") == "prod"
+    else ".env.test"
+    if os.getenv("ENV") == "test"
+    else ".env.dev"
+)
 load_dotenv(env_file)
 
 BaseDir = Path(__file__).parent.parent
 
 
 class DbSetting(BaseModel):
-    print(os.getenv("DATABASE_URL"))
     url: str = os.getenv("DATABASE_URL")
     echo: bool = True
 

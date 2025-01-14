@@ -1,16 +1,16 @@
 version: '3.8'
 
 services:
-  db:
+  db_test:
     image: postgres:latest
     environment:
       POSTGRES_PASSWORD: "qwerty"
+      POSTGRES_DB: "test_db"
     ports:
-      - "5437:5432"
+      - "5438:5432"
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - db_test_data:/var/lib/postgresql/data
     restart: unless-stopped
 
-
 volumes:
-  db_data:
+  db_test_data:

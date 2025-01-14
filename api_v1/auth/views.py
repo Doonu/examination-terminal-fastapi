@@ -1,7 +1,5 @@
 from fastapi import APIRouter, Depends
 from fastapi.security import HTTPBearer
-from sqlalchemy import select, Result
-from sqlalchemy.ext.asyncio import AsyncSession
 
 
 from ..auth.dependencies import (
@@ -12,9 +10,8 @@ from ..auth.dependencies import (
     create_access_token,
 )
 from ..auth.schemas import AuthBase
-from core.models import User, db_helper
+from core.models import User
 
-http_bearer = HTTPBearer()
 router = APIRouter(tags=["Auth"])
 
 

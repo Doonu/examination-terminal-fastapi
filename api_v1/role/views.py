@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, Form
-from fastapi.security import HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api_v1.role import crud

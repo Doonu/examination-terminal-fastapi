@@ -46,9 +46,9 @@ async def create_token(
     )
 
 
-# Добавить возможность выбирать роль
 async def register_user(
     email: EmailStr = Form(),
+    role_id: int = Form(),
     password: str = Form(),
     session: AsyncSession = Depends(db_helper.scoped_session_dependency),
 ) -> User:
@@ -60,7 +60,7 @@ async def register_user(
             detail="A user with this email already exists",
         )
 
-    base_role = await auth_crud.get_role_by_name(session=session, name="Студент")
+    base_role = await auth_crud.get_role_by_id(session=session, role_id=role_id)
     profile = await profile_crud.create_profile(
         session=session, email=email, role_id=base_role.id
     )
