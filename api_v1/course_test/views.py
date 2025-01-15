@@ -8,7 +8,7 @@ from api_v1.auth.dependencies import get_user_id_in_access_token
 from api_v1.course.dependencies import get_course_by_id
 from api_v1.course.schemas import CourseGet
 from api_v1.course_test import crud as test_crud
-from api_v1.course_test.schemas import TestGet, ResultTest
+from api_v1.course_test.schemas import TestGet, ResultTest, TestProgressTest
 from api_v1.questions.schemas import QuestionBase
 from core.models import db_helper
 
@@ -32,7 +32,7 @@ async def get_test(
     return await test_crud.get_test(test_id=test_id, session=session)
 
 
-@router.get("/{test_id}/progress_test")
+@router.get("/{test_id}/progress_test", response_model=TestProgressTest)
 async def get_progress_test(
     test_id: int,
     user_id: int = Depends(get_user_id_in_access_token),

@@ -46,7 +46,7 @@ elif [ "$MODE" = "test" ]; then
     trap cleanup EXIT
     exit 1; }
 
-#  trap cleanup EXIT
+  trap cleanup EXIT
 
 else
   echo "Запуск dev-среды..."
