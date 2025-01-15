@@ -1,12 +1,10 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import TYPE_CHECKING, List
 
 from sqlalchemy import (
     Integer,
     CheckConstraint,
     func,
-    DateTime,
-    Interval,
     String,
     ARRAY,
     ForeignKey,
