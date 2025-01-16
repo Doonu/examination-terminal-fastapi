@@ -15,7 +15,7 @@ from api_v1.auth.helpers import (
 )
 from api_v1.auth.schemas import AuthBase
 from api_v1.auth.utils import hash_password, validate_password, encode_jwt, decode_jwt
-from api_v1.profile import crud as profile_crud
+from api_v1.profile import crud as profile_crud, crud
 from core.config import settings
 from core.models import User, db_helper
 
@@ -23,8 +23,8 @@ from core.models import User, db_helper
 http_bearer = HTTPBearer()
 
 
-async def create_tokens_by_auth(user: User):
-    access_token = await create_access_token(user=user)
+async def create_tokens_by_auth(user: User, session: AsyncSession):
+    access_token = await create_access_token(user=user, session=session)
     refresh_token = await create_refresh_token(user=user)
     return AuthBase(
         token_type="Bearer", refresh_token=refresh_token, access_token=access_token
@@ -120,8 +120,14 @@ async def get_current_auth_user_for_refresh(
     )
 
 
-async def create_access_token(user: User) -> str:
-    jwt_payload = {"email": user.email, "user_id": user.id, "sub": user.email}
+async def create_access_token(user: User, session: AsyncSession) -> str:
+    profile = await crud.get_profile(session=session, user_id=user.id)
+    jwt_payload = {
+        "email": user.email,
+        "user_id": user.id,
+        "sub": user.email,
+        "role_id": profile.role_id,
+    }
     return await create_token(
         token_type=ACCESS_TOKEN_TYPE,
         token_data=jwt_payload,

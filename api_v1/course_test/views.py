@@ -1,9 +1,10 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, Form
+from fastapi import APIRouter, Depends, Form, Request
 from fastapi.security import HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from api_v1.auth.decorators import role_required
 from api_v1.auth.dependencies import get_user_id_in_access_token
 from api_v1.course.dependencies import get_course_by_id
 from api_v1.course.schemas import CourseGet
@@ -33,7 +34,9 @@ async def get_test(
 
 
 @router.get("/{test_id}/progress_test", response_model=TestProgressTest)
+@role_required("Студент")
 async def get_progress_test(
+    request: Request,
     test_id: int,
     user_id: int = Depends(get_user_id_in_access_token),
     session: AsyncSession = Depends(db_helper.scoped_session_dependency),
@@ -44,7 +47,9 @@ async def get_progress_test(
 
 
 @router.post("/")
+@role_required("Преподаватель")
 async def create_test(
+    request: Request,
     user_id: int = Depends(get_user_id_in_access_token),
     session: AsyncSession = Depends(db_helper.scoped_session_dependency),
     name_test: str = Form(),
@@ -56,7 +61,9 @@ async def create_test(
 
 
 @router.post("/{test_id}/add_questions")
+@role_required("Преподаватель")
 async def add_questions_in_test(
+    request: Request,
     test_id: int,
     questions: List[QuestionBase],
     session: AsyncSession = Depends(db_helper.scoped_session_dependency),
@@ -67,7 +74,9 @@ async def add_questions_in_test(
 
 
 @router.post("/{test_id}/access_activation")
+@role_required("Преподаватель")
 async def access_activation(
+    request: Request,
     test_id: int,
     deadline_date: int,
     course: CourseGet = Depends(get_course_by_id),
@@ -82,7 +91,9 @@ async def access_activation(
 
 
 @router.post("/{test_id}/start_test")
+@role_required("Студент")
 async def start_test(
+    request: Request,
     test_id: int,
     user_id: int = Depends(get_user_id_in_access_token),
     session: AsyncSession = Depends(db_helper.scoped_session_dependency),
@@ -91,7 +102,9 @@ async def start_test(
 
 
 @router.post("/{test_id}/completion_test")
+@role_required("Студент")
 async def completion_test(
+    request: Request,
     test_id: int,
     result_test: List[ResultTest],
     user_id: int = Depends(get_user_id_in_access_token),

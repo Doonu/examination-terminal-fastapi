@@ -32,3 +32,4 @@ class ProfileUpdate(BaseModel):
 
 class ProfileGet(Profile):
     role: Role
+    role_id: int

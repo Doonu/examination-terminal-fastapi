@@ -15,13 +15,6 @@ from core.models import Course, CourseStudentAssociation, CourseTestAssociation
 async def create_course(
     session: AsyncSession, name: str, description: str, user_id: int
 ):
-    teacher_profile = await crud_profile.get_profile(user_id=user_id, session=session)
-    if not teacher_profile.role.name == "Преподаватель":
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Нет прав на создание курса",
-        )
-
     course = Course(name=name, description=description, teacher_id=user_id)
     session.add(course)
     await session.commit()

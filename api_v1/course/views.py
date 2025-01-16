@@ -1,9 +1,10 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, Form
+from fastapi import APIRouter, Depends, Form, Request
 from fastapi.security import HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from api_v1.auth.decorators import role_required
 from api_v1.auth.dependencies import get_user_id_in_access_token
 from api_v1.course import crud as course_crud
 from api_v1.course.dependencies import get_course_by_id
@@ -23,7 +24,9 @@ async def get_course(
 
 
 @router.post("/")
+@role_required("Преподаватель")
 async def create_course(
+    request: Request,
     user_id: int = Depends(get_user_id_in_access_token),
     name: str = Form(),
     description: str = Form(),
@@ -42,7 +45,9 @@ async def get_item_course(
 
 
 @router.patch("/{course_id}")
+@role_required("Преподаватель")
 async def update_course(
+    request: Request,
     course_update: CourseUpdatePartial,
     course: CourseGet = Depends(get_course_by_id),
     session: AsyncSession = Depends(db_helper.scoped_session_dependency),
@@ -53,7 +58,9 @@ async def update_course(
 
 
 @router.delete("/{course_id}")
+@role_required("Преподаватель")
 async def delete_course(
+    request: Request,
     course: CourseGet = Depends(get_course_by_id),
     session: AsyncSession = Depends(db_helper.scoped_session_dependency),
 ):
@@ -61,7 +68,9 @@ async def delete_course(
 
 
 @router.post("/{course_id}/add_test")
+@role_required("Преподаватель")
 async def add_test_in_course(
+    request: Request,
     tests_ids: List[int],
     course: CourseGet = Depends(get_course_by_id),
     session: AsyncSession = Depends(db_helper.scoped_session_dependency),
@@ -72,7 +81,9 @@ async def add_test_in_course(
 
 
 @router.post("/{course_id}/add_student")
+@role_required("Преподаватель")
 async def add_student_in_course(
+    request: Request,
     student_ids: List[int],
     course: CourseGet = Depends(get_course_by_id),
     session: AsyncSession = Depends(db_helper.scoped_session_dependency),
@@ -83,7 +94,9 @@ async def add_student_in_course(
 
 
 @router.post("/{course_id}/delete_student")
+@role_required("Преподаватель")
 async def delete_student_in_course(
+    request: Request,
     student_id: int,
     course: CourseGet = Depends(get_course_by_id),
     session: AsyncSession = Depends(db_helper.scoped_session_dependency),
