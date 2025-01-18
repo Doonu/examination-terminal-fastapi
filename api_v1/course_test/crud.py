@@ -11,7 +11,7 @@ from sqlalchemy.orm import selectinload
 from api_v1.course.schemas import CourseGet
 from api_v1.course_test.scheduled_task import scheduled_test_progress_overdue
 
-from api_v1.course_test.schemas import ResultTest
+from api_v1.course_test.schemas import ResultTest, TestProgressTest
 from api_v1.questions import crud as crud_question
 from core.models import Test, TestQuestionAssociation, TestProgress
 from core.models.test_progress import TestProgressResult
@@ -86,6 +86,7 @@ async def access_activation(
 
         test_progress = TestProgress(
             test_id=test_id,
+            course_id=course.id,
             status=1,
             timelimit=test.time_limit,
             result_test=questions,
@@ -99,13 +100,21 @@ async def access_activation(
             scheduled_test_progress_overdue,
             trigger="date",
             run_date=dt_local,
-            args=[test_progress.test_id, test_progress.participant_id],
+            args=[test_progress.id],
         )
 
     await session.commit()
 
 
-async def start_test(progress_test, session: AsyncSession):
+async def start_test(
+    progress_test: TestProgressTest, user_id: int, session: AsyncSession
+):
+    if progress_test.participant_id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Нет прав для прохождения теста",
+        )
+
     if progress_test.status != 1:
         return progress_test
 
@@ -119,8 +128,14 @@ async def start_test(progress_test, session: AsyncSession):
 
 
 async def completion_test(
-    progress_test, session: AsyncSession, result_test: List[ResultTest]
+    progress_test, user_id: int, result_test: List[ResultTest], session: AsyncSession
 ):
+    if progress_test.participant_id != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Нет прав для завершения теста",
+        )
+
     if progress_test.status != 2:
         return progress_test
 

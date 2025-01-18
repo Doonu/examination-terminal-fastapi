@@ -5,19 +5,16 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from api_v1.auth.dependencies import get_user_id_in_access_token
 from core.models import TestProgress, db_helper
 
 
 async def get_progress_test(
-    test_id: int,
+    progress_test_id: int,
     session: AsyncSession = Depends(db_helper.scoped_session_dependency),
-    user_id: int = Depends(get_user_id_in_access_token),
 ):
     test = await session.scalar(
         select(TestProgress)
-        .where(TestProgress.test_id == test_id)
-        .where(TestProgress.participant_id == user_id)
+        .where(TestProgress.id == progress_test_id)
         .options(selectinload(TestProgress.result_test))
     )
 

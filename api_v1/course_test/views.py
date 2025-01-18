@@ -34,8 +34,7 @@ async def get_test(
     return await test_crud.get_test(test_id=test_id, session=session)
 
 
-@router.get("/{test_id}/progress_test", response_model=TestProgressTest)
-@role_required("Студент")
+@router.get("/{progress_test_id}/progress_test", response_model=TestProgressTest)
 async def get_progress_test(
     request: Request,
     progress_test=Depends(get_progress_test),
@@ -87,24 +86,31 @@ async def access_activation(
     )
 
 
-@router.post("/{test_id}/start_test")
+@router.post("/{progress_test_id}/start_test")
 @role_required("Студент")
 async def start_test(
     request: Request,
-    progress_test=Depends(get_progress_test),
+    progress_test: TestProgressTest = Depends(get_progress_test),
+    user_id: int = Depends(get_user_id_in_access_token),
     session: AsyncSession = Depends(db_helper.scoped_session_dependency),
 ):
-    return await test_crud.start_test(session=session, progress_test=progress_test)
+    return await test_crud.start_test(
+        session=session, progress_test=progress_test, user_id=user_id
+    )
 
 
-@router.post("/{test_id}/completion_test")
+@router.post("/{progress_test_id}/completion_test")
 @role_required("Студент")
 async def completion_test(
     request: Request,
     result_test: List[ResultTest],
+    user_id: int = Depends(get_user_id_in_access_token),
     progress_test=Depends(get_progress_test),
     session: AsyncSession = Depends(db_helper.scoped_session_dependency),
 ):
     return await test_crud.completion_test(
-        session=session, result_test=result_test, progress_test=progress_test
+        session=session,
+        result_test=result_test,
+        progress_test=progress_test,
+        user_id=user_id,
     )
