@@ -9,6 +9,7 @@ from api_v1.auth.dependencies import get_user_id_in_access_token
 from api_v1.course.dependencies import get_course_by_id
 from api_v1.course.schemas import CourseGet
 from api_v1.course_test import crud as test_crud
+from api_v1.course_test.dependencies import get_progress_test
 from api_v1.course_test.schemas import TestGet, ResultTest, TestProgressTest
 from api_v1.questions.schemas import QuestionBase
 from core.models import db_helper
@@ -37,13 +38,9 @@ async def get_test(
 @role_required("Студент")
 async def get_progress_test(
     request: Request,
-    test_id: int,
-    user_id: int = Depends(get_user_id_in_access_token),
-    session: AsyncSession = Depends(db_helper.scoped_session_dependency),
+    progress_test=Depends(get_progress_test),
 ):
-    return await test_crud.get_progress_test(
-        test_id=test_id, session=session, user_id=user_id
-    )
+    return progress_test
 
 
 @router.post("/")
@@ -94,22 +91,20 @@ async def access_activation(
 @role_required("Студент")
 async def start_test(
     request: Request,
-    test_id: int,
-    user_id: int = Depends(get_user_id_in_access_token),
+    progress_test=Depends(get_progress_test),
     session: AsyncSession = Depends(db_helper.scoped_session_dependency),
 ):
-    return await test_crud.start_test(test_id=test_id, session=session, user_id=user_id)
+    return await test_crud.start_test(session=session, progress_test=progress_test)
 
 
 @router.post("/{test_id}/completion_test")
 @role_required("Студент")
 async def completion_test(
     request: Request,
-    test_id: int,
     result_test: List[ResultTest],
-    user_id: int = Depends(get_user_id_in_access_token),
+    progress_test=Depends(get_progress_test),
     session: AsyncSession = Depends(db_helper.scoped_session_dependency),
 ):
     return await test_crud.completion_test(
-        session=session, test_id=test_id, result_test=result_test, user_id=user_id
+        session=session, result_test=result_test, progress_test=progress_test
     )

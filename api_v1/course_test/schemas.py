@@ -58,3 +58,4 @@ class TestProgressTest(BaseModel):
     timelimit: int
     test: Test
     result_test: List[TestProgressResultTest]
+    remaining_time: Optional[int] = None

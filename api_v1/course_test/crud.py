@@ -1,15 +1,25 @@
+import datetime
 import time
 from typing import List
 
+import pytz
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from fastapi import HTTPException, status
 from sqlalchemy import select, Result
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from api_v1.course.schemas import CourseGet
+from api_v1.course_test.scheduled_task import scheduled_test_progress_overdue
+
 from api_v1.course_test.schemas import ResultTest
 from api_v1.questions import crud as crud_question
-from core.models import Test, TestQuestionAssociation, TestProgress, Profile
+from core.models import Test, TestQuestionAssociation, TestProgress, db_helper
 from core.models.test_progress import TestProgressResult
+
+
+scheduler = AsyncIOScheduler(timezone="UTC")
+scheduler.start()
 
 
 async def get_test(session: AsyncSession, test_id: int):
@@ -58,7 +68,6 @@ async def add_questions_in_test(
     await session.commit()
 
 
-# Делать проверку на студента
 async def access_activation(
     test_id: int,
     deadline_date,
@@ -89,86 +98,53 @@ async def access_activation(
         )
         session.add(test_progress)
 
+        dt_local = datetime.datetime.fromtimestamp(deadline_date, pytz.utc)
+        scheduler.add_job(
+            scheduled_test_progress_overdue,
+            trigger="date",
+            run_date=dt_local,
+            args=[test_progress.test_id, test_progress.participant_id],
+        )
+
     await session.commit()
 
 
-async def get_progress_test(
-    test_id: int,
-    user_id: int,
-    session: AsyncSession,
-):
-    test = await session.scalar(
-        select(TestProgress)
-        .where(TestProgress.test_id == test_id)
-        .where(TestProgress.participant_id == user_id)
-        .options(selectinload(TestProgress.result_test))
-    )
+async def start_test(progress_test, session: AsyncSession):
+    if progress_test.status != 1:
+        return progress_test
 
-    if not test:
-        return test
+    if progress_test:
+        progress_test.status = 2
+        progress_test.attempt_date = int(time.time())
 
-    if test.status == 1 and int(time.time()) > test.deadline_date:
-        test.status = 4
-        return test
-
-    if test.status == 1 or test.status == 3 or test.status == 4:
-        return test
-
-    end_date = (
-        test.deadline_date
-        if test.attempt_date > test.deadline_date
-        else test.attempt_date
-    )
-    remaining_time = abs(int(time.time()) - (end_date + int(test.timelimit)))
-
-    if test.status == 2:
-        if remaining_time <= 0:
-            test.status = 3
-            test.remaining_time = 0
-        else:
-            test.remaining_time = remaining_time
-
-    return test
-
-
-async def start_test(
-    test_id: int,
-    user_id: int,
-    session: AsyncSession,
-):
-    test = await get_progress_test(session=session, test_id=test_id, user_id=user_id)
-
-    if test.status != 1:
-        return test
-
-    if test:
-        test.status = 2
-        test.attempt_date = int(time.time())
-
-    session.add(test)
+    session.add(progress_test)
     await session.commit()
-    return test
+    return progress_test
 
 
 async def completion_test(
-    test_id: int, user_id: int, session: AsyncSession, result_test: List[ResultTest]
+    progress_test, session: AsyncSession, result_test: List[ResultTest]
 ):
-    test = await get_progress_test(session=session, test_id=test_id, user_id=user_id)
+    if progress_test.status != 2:
+        return progress_test
 
-    if test.status != 2:
-        return test
+    if progress_test.status == 4:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Вышло время на прохождение текста",
+        )
 
-    if test:
-        test.status = 3
+    if progress_test:
+        progress_test.status = 3
         count_current_answer = 0
 
         for i, res in enumerate(result_test):
             if res.student_answer == res.correct_answer:
                 count_current_answer += 1
-            test.result_test[i].student_answer = res.student_answer
+            progress_test.result_test[i].student_answer = res.student_answer
 
-        test.count_current_answer = count_current_answer
+        progress_test.count_current_answer = count_current_answer
 
-    session.add(test)
+    session.add(progress_test)
     await session.commit()
-    return test
+    return progress_test
