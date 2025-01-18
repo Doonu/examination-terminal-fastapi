@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api_v1.course_test.dependencies import get_progress_test
+from api_v1.test_progress.dependencies import get_progress_test
 from core.models import db_helper
 
 

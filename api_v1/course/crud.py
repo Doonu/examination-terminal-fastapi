@@ -1,14 +1,12 @@
 from typing import Union
 
-from fastapi import HTTPException
 from sqlalchemy import select, Result
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-from starlette import status
 
 from api_v1.course.schemas import CourseGet, CourseUpdatePartial
+from api_v1.course_test.dependencies import get_test
 from api_v1.profile import crud as crud_profile
-from api_v1.course_test import crud as crud_test
 from core.models import Course, CourseStudentAssociation, CourseTestAssociation
 
 
@@ -48,8 +46,7 @@ async def add_test_in_course(
     tests_ids: Union[int, list[int]], session: AsyncSession, course
 ):
     tests = [
-        await crud_test.get_test(session=session, test_id=single_id)
-        for single_id in tests_ids
+        await get_test(session=session, test_id=single_id) for single_id in tests_ids
     ]
 
     for test in tests:

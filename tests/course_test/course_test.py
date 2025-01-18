@@ -8,13 +8,15 @@ from api_v1.course_test.views_test import (
     add_test_in_course_test,
     add_student_in_course_test,
     access_activation_test,
+)
+from api_v1.profile.views_test import get_profile_test
+from api_v1.role.views_test import get_role_list_test, create_role_test
+from api_v1.test_progress.views_test import (
     get_progress_test,
     start_test_test,
     completion_test,
     get_progress_test_complete,
 )
-from api_v1.profile.views_test import get_profile_test
-from api_v1.role.views_test import get_role_list_test, create_role_test
 from tests.course_test.constants import (
     role_teacher,
     role_student,
@@ -36,6 +38,7 @@ from tests.course_test.constants import (
     deadline_date,
     result_test,
     count_current_answer,
+    progress_id_test,
 )
 
 
@@ -86,25 +89,27 @@ async def test_course_test(async_client):
     await auth_login_test(async_client, email=email_student, password=password_student)
     await get_progress_test(
         async_client,
-        test_id=id_test,
+        progress_test_id=progress_id_test,
         status=1,
         name_test=name_test,
         deadline_date=deadline_date,
         teacher_id=id_teacher,
     )
 
-    await start_test_test(async_client, test_id=id_test)
+    await start_test_test(async_client, progress_test_id=progress_id_test)
     await get_progress_test(
         async_client,
-        test_id=id_test,
         status=2,
         name_test=name_test,
         deadline_date=deadline_date,
         teacher_id=id_teacher,
+        progress_test_id=progress_id_test,
     )
-    await completion_test(async_client, test_id=id_test, result_test=result_test)
+    await completion_test(
+        async_client, progress_test_id=progress_id_test, result_test=result_test
+    )
     await get_progress_test_complete(
         async_client,
-        test_id=id_test,
+        progress_test_id=progress_id_test,
         count_current_answer=count_current_answer,
     )

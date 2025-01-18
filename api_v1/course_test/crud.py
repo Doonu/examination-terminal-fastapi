@@ -1,31 +1,18 @@
 import datetime
-import time
-from typing import List
 
 import pytz
-from fastapi import HTTPException, status
 from sqlalchemy import select, Result
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from api_v1.course.schemas import CourseGet
 from api_v1.course_test.scheduled_task import scheduled_test_progress_overdue
+from api_v1.course_test.schemas import TestGet
 
-from api_v1.course_test.schemas import ResultTest, TestProgressTest
 from api_v1.questions import crud as crud_question
 from core.models import Test, TestQuestionAssociation, TestProgress
 from core.models.test_progress import TestProgressResult
 from scheduler import scheduler
-
-
-async def get_test(session: AsyncSession, test_id: int):
-    return await session.scalar(
-        select(Test)
-        .where(Test.id == test_id)
-        .options(
-            selectinload(Test.questions).joinedload(TestQuestionAssociation.question)
-        )
-    )
 
 
 async def get_list_test(session: AsyncSession, user_id: int):
@@ -49,12 +36,10 @@ async def create_test(session: AsyncSession, user_id: int, name: str, time_limit
 
 
 async def add_questions_in_test(
-    test_id: int,
+    test: TestGet,
     session: AsyncSession,
     questions,
 ):
-    test = await get_test(test_id=test_id, session=session)
-
     for question_in in questions:
         question = await crud_question.create_question(
             session=session, question_in=question_in
@@ -65,17 +50,15 @@ async def add_questions_in_test(
 
 
 async def access_activation(
-    test_id: int,
+    test: TestGet,
     deadline_date,
     course: CourseGet,
     session: AsyncSession,
 ):
-    test = await get_test(test_id=test_id, session=session)
-
     for student in course.students:
         questions = [
             TestProgressResult(
-                test_progress_id=test_id,
+                test_progress_id=test.id,
                 text_question=association.question.text_question,
                 options=association.question.options,
                 correct_answer=association.question.correct_answer,
@@ -85,7 +68,7 @@ async def access_activation(
         ]
 
         test_progress = TestProgress(
-            test_id=test_id,
+            test_id=test.id,
             course_id=course.id,
             status=1,
             timelimit=test.time_limit,
@@ -104,58 +87,3 @@ async def access_activation(
         )
 
     await session.commit()
-
-
-async def start_test(
-    progress_test: TestProgressTest, user_id: int, session: AsyncSession
-):
-    if progress_test.participant_id != user_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Нет прав для прохождения теста",
-        )
-
-    if progress_test.status != 1:
-        return progress_test
-
-    if progress_test:
-        progress_test.status = 2
-        progress_test.attempt_date = int(time.time())
-
-    session.add(progress_test)
-    await session.commit()
-    return progress_test
-
-
-async def completion_test(
-    progress_test, user_id: int, result_test: List[ResultTest], session: AsyncSession
-):
-    if progress_test.participant_id != user_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Нет прав для завершения теста",
-        )
-
-    if progress_test.status != 2:
-        return progress_test
-
-    if progress_test.status == 4:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Вышло время на прохождение текста",
-        )
-
-    if progress_test:
-        progress_test.status = 3
-        count_current_answer = 0
-
-        for i, res in enumerate(result_test):
-            if res.student_answer == res.correct_answer:
-                count_current_answer += 1
-            progress_test.result_test[i].student_answer = res.student_answer
-
-        progress_test.count_current_answer = count_current_answer
-
-    session.add(progress_test)
-    await session.commit()
-    return progress_test

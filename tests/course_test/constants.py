@@ -1,3 +1,7 @@
+from datetime import timedelta
+import datetime
+
+
 role_teacher = "Преподаватель"
 role_teacher_id = 1
 role_student = "Студент"
@@ -24,7 +28,7 @@ id_test = 1
 questions = [
     {"text_question": "1 + 1", "options": ["1", "2", "3"], "correct_answer": "2"}
 ]
-deadline_date = 1737950101
+deadline_date = int((datetime.datetime.now() + timedelta(days=10)).timestamp())
 
 result_test = [
     {
@@ -34,6 +38,9 @@ result_test = [
         "student_answer": "2",
     }
 ]
+
+
+progress_id_test = 1
 
 count_current_answer = sum(
     1 for item in result_test if item["correct_answer"] == item["student_answer"]
