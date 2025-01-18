@@ -3,7 +3,6 @@ import time
 from typing import List
 
 import pytz
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import HTTPException, status
 from sqlalchemy import select, Result
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,12 +13,9 @@ from api_v1.course_test.scheduled_task import scheduled_test_progress_overdue
 
 from api_v1.course_test.schemas import ResultTest
 from api_v1.questions import crud as crud_question
-from core.models import Test, TestQuestionAssociation, TestProgress, db_helper
+from core.models import Test, TestQuestionAssociation, TestProgress
 from core.models.test_progress import TestProgressResult
-
-
-scheduler = AsyncIOScheduler(timezone="UTC")
-scheduler.start()
+from scheduler import scheduler
 
 
 async def get_test(session: AsyncSession, test_id: int):
