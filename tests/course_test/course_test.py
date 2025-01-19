@@ -1,12 +1,15 @@
 import pytest
 
 from api_v1.auth.views_test import registration_test, auth_login_test
-from api_v1.course.views_test import create_course_test, get_course_test
+from api_v1.course.views_test import (
+    create_course_test,
+    get_course_test,
+    add_test_in_course_test,
+    add_student_in_course_test,
+)
 from api_v1.course_test.views_test import (
     create_test_item_test,
     create_questions_and_add_in_test,
-    add_test_in_course_test,
-    add_student_in_course_test,
     access_activation_test,
 )
 from api_v1.profile.views_test import get_profile_test
