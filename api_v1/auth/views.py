@@ -6,7 +6,6 @@ from ..auth.dependencies import (
     register_user,
     create_tokens_by_auth,
     get_current_auth_user_for_refresh,
-    create_access_token,
 )
 from ..auth.schemas import AuthBase
 from core.models import User, db_helper
@@ -31,9 +30,8 @@ async def auth_registration(
 
 
 @router.post("/refresh", response_model=AuthBase, response_model_exclude_none=True)
-async def auth_refresh(user: User = Depends(get_current_auth_user_for_refresh)):
-    access_token = await create_access_token(user=user)
-    return AuthBase(access_token=access_token, token_type="Bearer")
+async def auth_refresh(user: User = Depends(get_current_auth_user_for_refresh), session: AsyncSession = Depends(db_helper.scoped_session_dependency)):
+    return await create_tokens_by_auth(user=user, session=session)
 
 
 # @router.get("/")

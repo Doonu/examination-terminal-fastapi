@@ -21,8 +21,8 @@ class Course(CourseBase):
 
 
 class CourseGet(Course):
-    students: Optional[list[ProfileGet]] = []
-    tests: Optional[list[Test]] = []
+    students: Optional[list[ProfileGet]]
+    tests: Optional[list[Test]]
 
     @field_validator("students", mode="before")
     @classmethod

@@ -118,7 +118,7 @@ async def get_current_auth_user_for_refresh(
         return user
 
     raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED, detail="token not found"
+        status_code=status.HTTP_404_NOT_FOUND, detail="token not found"
     )
 
 

@@ -7,6 +7,7 @@ from sqlalchemy.orm import selectinload
 from api_v1.course.schemas import CourseGet, CourseUpdatePartial
 from api_v1.course_test.dependencies import get_test
 from api_v1.profile import crud as crud_profile
+from api_v1.profile.crud import get_profile
 from core.models import Course, CourseStudentAssociation, CourseTestAssociation
 
 
@@ -19,14 +20,23 @@ async def create_course(
 
 
 async def get_list_course(session: AsyncSession, user_id: int) -> list[CourseGet]:
+    user = await get_profile(session=session, user_id=user_id)
+
     state = (
         select(Course)
-        .where(Course.teacher_id == user_id)
         .options(selectinload(Course.tests).joinedload(CourseTestAssociation.test))
         .options(
             selectinload(Course.students).joinedload(CourseStudentAssociation.student)
         )
     )
+
+    if user.role.name == "Преподаватель":
+        state = state.where(Course.teacher_id == user_id)
+
+    if user.role.name == "Студент":
+        state = state.where(Course.students.any(CourseStudentAssociation.profile_id == user_id))
+    
+
     result: Result = await session.execute(state)
     courses = result.scalars().all()
     return list(courses)

@@ -29,6 +29,7 @@ def encode_jwt(
 
 
 def decode_jwt(
+
     token: str,
     public_key: str = settings.auth.public_key_path.read_text(),
     algorithm: str = settings.auth.algorithm,
@@ -38,7 +39,7 @@ def decode_jwt(
         return decoded
     except jwt.ExpiredSignatureError:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=f"Token has expired"
+            status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Token has expired"
         )
     except jwt.InvalidTokenError as e:
         raise HTTPException(
