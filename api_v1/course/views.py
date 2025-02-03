@@ -1,6 +1,6 @@
-from typing import List
+from typing import List, Optional
 
-from fastapi import APIRouter, Depends, Form, Request
+from fastapi import APIRouter, Depends, Form, Request, Query
 from fastapi.security import HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,10 +17,11 @@ router = APIRouter(tags=["Course"], dependencies=[Depends(http_bearer)])
 
 @router.get("/", response_model=list[CourseGet])
 async def get_course(
+    search: Optional[str] = Query(None, min_length=1, description="Поисковая строка"),
     user_id: int = Depends(get_user_id_in_access_token),
     session: AsyncSession = Depends(db_helper.scoped_session_dependency),
 ):
-    return await course_crud.get_list_course(session=session, user_id=user_id)
+    return await course_crud.get_list_course(session=session, user_id=user_id, search=search)
 
 
 @router.post("/")

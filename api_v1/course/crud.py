@@ -1,6 +1,6 @@
-from typing import Union
+from typing import Union, Optional
 
-from sqlalchemy import select, Result
+from sqlalchemy import select, Result, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -19,7 +19,7 @@ async def create_course(
     await session.commit()
 
 
-async def get_list_course(session: AsyncSession, user_id: int) -> list[CourseGet]:
+async def get_list_course(session: AsyncSession, user_id: int, search: Optional[str]) -> list[CourseGet]:
     user = await get_profile(session=session, user_id=user_id)
 
     state = (
@@ -36,6 +36,13 @@ async def get_list_course(session: AsyncSession, user_id: int) -> list[CourseGet
     if user.role.name == "Студент":
         state = state.where(Course.students.any(CourseStudentAssociation.profile_id == user_id))
     
+    if search:
+        state = state.where(
+            or_(
+                Course.name.ilike(f"%{search}%"),
+                Course.description.ilike(f"%{search}%")
+            )
+        )
 
     result: Result = await session.execute(state)
     courses = result.scalars().all()
