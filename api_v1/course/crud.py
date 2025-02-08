@@ -1,6 +1,6 @@
 from typing import Union, Optional
 
-from sqlalchemy import select, Result, or_
+from sqlalchemy import select, Result, or_, asc, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -19,7 +19,7 @@ async def create_course(
     await session.commit()
 
 
-async def get_list_course(session: AsyncSession, user_id: int, search: Optional[str]) -> list[CourseGet]:
+async def get_list_course(session: AsyncSession, user_id: int, search: Optional[str], direct: Optional[int], sort_by: Optional[str]) -> list[CourseGet]:
     user = await get_profile(session=session, user_id=user_id)
 
     state = (
@@ -43,6 +43,11 @@ async def get_list_course(session: AsyncSession, user_id: int, search: Optional[
                 Course.description.ilike(f"%{search}%")
             )
         )
+
+    order_func = asc if direct == 1 else desc
+
+    sort_field = getattr(Course, sort_by, Course.name)
+    state = state.order_by(order_func(sort_field))
 
     result: Result = await session.execute(state)
     courses = result.scalars().all()
