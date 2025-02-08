@@ -12,11 +12,10 @@ from api_v1.test_progress.schemas import TestProgressTest
 from core.models import TestProgress
 
 
-async def get_list_test_progress(
+async def get_list_test_progress_in_course(
     user_id: int, test_id: int, course_id: int, session: AsyncSession
 ):
     user = await profile_crud.get_profile(session=session, user_id=user_id)
-    print(user.role.name)
 
     if user.role.name == "Преподаватель":
         state = (
@@ -32,6 +31,20 @@ async def get_list_test_progress(
             .where(TestProgress.participant_id == user_id)
             .options(selectinload(TestProgress.result_test))
         )
+
+    result: Result = await session.execute(state)
+    test_progress_list = result.scalars().all()
+    return list(test_progress_list)
+
+
+async def get_list_test_progress(user_id: int, test_id: int, session: AsyncSession):
+    user = await profile_crud.get_profile(session=session, user_id=user_id)
+
+    state = (
+        select(TestProgress)
+        .where(TestProgress.participant_id == user_id)
+        .options(selectinload(TestProgress.result_test))
+    )
 
     result: Result = await session.execute(state)
     test_progress_list = result.scalars().all()

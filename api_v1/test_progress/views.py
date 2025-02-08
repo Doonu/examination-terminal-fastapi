@@ -16,15 +16,28 @@ http_bearer = HTTPBearer()
 router = APIRouter(tags=["TestProgress"], dependencies=[Depends(http_bearer)])
 
 
-@router.get("/", response_model=List[TestProgressTest])
-async def get_list_progress_test(
+@router.get("/{course_id}", response_model=List[TestProgressTest])
+async def get_list_progress_test_in_course(
     course_id: int,
     test_id: int,
     user_id: int = Depends(get_user_id_in_access_token),
     session: AsyncSession = Depends(db_helper.scoped_session_dependency),
 ):
-    return await test_progress_crud.get_list_test_progress(
+    return await test_progress_crud.get_list_test_progress_in_course(
         user_id=user_id, session=session, course_id=course_id, test_id=test_id
+    )
+
+
+@router.get("/")
+async def get_list_progress_test(
+    test_id: int,
+    user_id: int = Depends(get_user_id_in_access_token),
+    session: AsyncSession = Depends(db_helper.scoped_session_dependency),
+):
+    return await test_progress_crud.get_list_test_progress(
+        user_id=user_id,
+        test_id=test_id,
+        session=session,
     )
 
 
