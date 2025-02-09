@@ -8,6 +8,7 @@ from sqlalchemy import (
     String,
     ARRAY,
     ForeignKey,
+    BigInteger,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -40,7 +41,7 @@ class TestProgress(Base):
     status: Mapped[int] = mapped_column(
         Integer, CheckConstraint("status IN (1, 2, 3, 4)"), nullable=True
     )
-    deadline_date: Mapped[int] = mapped_column(Integer, nullable=True)
+    deadline_date: Mapped[int] = mapped_column(BigInteger, nullable=True)
     attempt_date: Mapped[int] = mapped_column(Integer, nullable=True)
     timelimit: Mapped[int] = mapped_column(
         Integer,

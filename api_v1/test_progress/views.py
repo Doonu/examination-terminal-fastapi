@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.security import HTTPBearer
@@ -30,7 +30,7 @@ async def get_list_progress_test_in_course(
 
 @router.get("/")
 async def get_list_progress_test(
-    filter_date: int,
+    filter_date: Optional[int],
     user_id: int = Depends(get_user_id_in_access_token),
     session: AsyncSession = Depends(db_helper.scoped_session_dependency),
 ):
