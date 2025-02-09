@@ -30,13 +30,13 @@ async def get_list_progress_test_in_course(
 
 @router.get("/")
 async def get_list_progress_test(
-    test_id: int,
+    filter_date: int,
     user_id: int = Depends(get_user_id_in_access_token),
     session: AsyncSession = Depends(db_helper.scoped_session_dependency),
 ):
     return await test_progress_crud.get_list_test_progress(
         user_id=user_id,
-        test_id=test_id,
+        filter_date=filter_date,
         session=session,
     )
 

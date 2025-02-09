@@ -37,12 +37,11 @@ async def get_list_test_progress_in_course(
     return list(test_progress_list)
 
 
-async def get_list_test_progress(user_id: int, test_id: int, session: AsyncSession):
-    user = await profile_crud.get_profile(session=session, user_id=user_id)
-
+async def get_list_test_progress(user_id: int, filter_date: int, session: AsyncSession):
     state = (
         select(TestProgress)
         .where(TestProgress.participant_id == user_id)
+        .where(TestProgress.deadline_date >= filter_date)
         .options(selectinload(TestProgress.result_test))
     )
 
