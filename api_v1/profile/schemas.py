@@ -11,7 +11,7 @@ class ProfileBase(BaseModel):
     last_name: Optional[str] = None
     age: Optional[int] = None
     gender: Optional[int] = Field(
-        None, description="Пол: 1 - мужской, 2 - женский", ge=1, le=2
+        None, description="Пол: 2 - мужской, 1 - женский", ge=1, le=2
     )
 
 
@@ -26,7 +26,7 @@ class ProfileUpdate(BaseModel):
     last_name: Optional[str] = None
     age: Optional[int] = None
     gender: Optional[int] = Field(
-        None, description="Пол: 1 - мужской, 2 - женский", ge=1, le=2
+        None, description="Пол: 2 - мужской, 1 - женский", ge=1, le=2
     )
 
 

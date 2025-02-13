@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from api_v1.auth.dependencies import get_user_id_in_access_token
 from api_v1.profile import crud as profile_crud
-from api_v1.profile.schemas import ProfileGet, ProfileUpdate, Profile
+from api_v1.profile.schemas import ProfileGet, ProfileUpdate
 from core.models import db_helper
 
 http_bearer = HTTPBearer()

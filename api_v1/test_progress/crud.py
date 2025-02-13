@@ -7,34 +7,44 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from api_v1.course_test.schemas import ResultTest
-from api_v1.profile import crud as profile_crud
 from api_v1.test_progress.schemas import TestProgressTest
 from core.models import TestProgress
 
 
 async def get_list_test_progress_in_course(
-    user_id: int, test_id: int, course_id: int, session: AsyncSession
+    test_id: int, course_id: int, session: AsyncSession
 ):
-    user = await profile_crud.get_profile(session=session, user_id=user_id)
-
-    if user.role.name == "Преподаватель":
-        state = (
-            select(TestProgress)
-            .where(TestProgress.test_id == test_id)
-            .where(TestProgress.course_id == course_id)
-            .options(selectinload(TestProgress.result_test))
-        )
-    else:
-        state = (
-            select(TestProgress)
-            .where(TestProgress.course_id == course_id)
-            .where(TestProgress.participant_id == user_id)
-            .options(selectinload(TestProgress.result_test))
-        )
+    state = (
+        select(TestProgress)
+        .where(TestProgress.test_id == test_id)
+        .where(TestProgress.course_id == course_id)
+        .options(selectinload(TestProgress.result_test))
+    )
 
     result: Result = await session.execute(state)
     test_progress_list = result.scalars().all()
     return list(test_progress_list)
+
+
+async def get_test_progress(
+    test_id: int, course_id: int, user_id: int, session: AsyncSession
+):
+    state = (
+        select(TestProgress)
+        .where(TestProgress.test_id == test_id)
+        .where(TestProgress.course_id == course_id)
+        .where(TestProgress.participant_id == user_id)
+        .options(selectinload(TestProgress.result_test))
+    )
+    results = await session.scalars(state)
+    test_progress = next(results, None)
+
+    if test_progress is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Прогресс теста не найден"
+        )
+
+    return test_progress
 
 
 async def get_list_test_progress(user_id: int, filter_date: int, session: AsyncSession):
