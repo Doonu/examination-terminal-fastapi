@@ -6,6 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from api_v1.test_progress.crud import completion_test
 from core.models import TestProgress, db_helper
 
 
@@ -48,15 +49,14 @@ async def get_progress_test(
         else test_progress.attempt_date
     )
 
-    print(end_date, time.time())
-    # if end_date < int(time.time()):
-    #     await completion_test(
-    #         progress_test=test_progress,
-    #         user_id=user_id,
-    #         result_test=test_progress.result_test,
-    #         session=session,
-    #     )
-    #     return
+    if end_date < int(time.time()):
+        await completion_test(
+            progress_test=test_progress,
+            user_id=user_id,
+            result_test=test_progress.result_test,
+            session=session,
+        )
+        return
 
     remaining_time = end_date - (int(time.time()) + int(test_progress.timelimit))
 
