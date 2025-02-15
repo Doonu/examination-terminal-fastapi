@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from fastapi import Path, Depends
-from sqlalchemy import select, true
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 

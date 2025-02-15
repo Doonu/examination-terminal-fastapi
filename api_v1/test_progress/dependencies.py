@@ -1,7 +1,7 @@
 import time
 from typing import Optional
 
-from fastapi import Depends, status, HTTPException
+from fastapi import Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
