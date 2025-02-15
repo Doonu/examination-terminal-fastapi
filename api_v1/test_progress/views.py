@@ -8,7 +8,9 @@ from api_v1.auth.decorators import role_required
 from api_v1.auth.dependencies import get_user_id_in_access_token
 from api_v1.course_test.schemas import ResultTest
 from api_v1.test_progress import crud as test_progress_crud
-from api_v1.test_progress.dependencies import get_progress_test
+from api_v1.test_progress.dependencies import (
+    get_progress_test as get_progress_test_dependency,
+)
 from api_v1.test_progress.schemas import TestProgressTest
 from core.models import db_helper
 
@@ -16,7 +18,7 @@ http_bearer = HTTPBearer()
 router = APIRouter(tags=["TestProgress"], dependencies=[Depends(http_bearer)])
 
 
-@router.get("/")
+@router.get("/", response_model=List[TestProgressTest])
 async def get_list_progress_test(
     filter_date: Optional[int],
     user_id: int = Depends(get_user_id_in_access_token),
@@ -31,12 +33,12 @@ async def get_list_progress_test(
 
 @router.get("/{progress_test_id}", response_model=TestProgressTest)
 async def get_progress_test(
-    progress_test: TestProgressTest = Depends(get_progress_test),
+    progress_test: TestProgressTest = Depends(get_progress_test_dependency),
 ):
     return progress_test
 
 
-@router.post("/{progress_test_id}/start_test")
+@router.post("/{progress_test_id}/start-test")
 @role_required("Студент")
 async def start_test(
     request: Request,
@@ -49,7 +51,7 @@ async def start_test(
     )
 
 
-@router.post("/{progress_test_id}/completion_test")
+@router.post("/{progress_test_id}/completion-test")
 @role_required("Студент")
 async def completion_test(
     request: Request,
@@ -67,7 +69,7 @@ async def completion_test(
 
 
 @role_required("Преподаватель")
-@router.get("/course/{course_id}", response_model=List[TestProgressTest])
+@router.get("/{course_id}", response_model=List[TestProgressTest])
 async def get_list_progress_test_in_course(
     course_id: int,
     test_id: int,
@@ -78,13 +80,13 @@ async def get_list_progress_test_in_course(
     )
 
 
-@router.get("/course/{course_id}/", response_model=TestProgressTest)
+@router.get("/course/{course_id}", response_model=TestProgressTest)
 async def get_test_progress_test(
     course_id: int,
     test_id: int,
     user_id: int = Depends(get_user_id_in_access_token),
     session: AsyncSession = Depends(db_helper.scoped_session_dependency),
 ):
-    return await test_progress_crud.get_test_progress(
+    return await get_progress_test_dependency(
         course_id=course_id, session=session, user_id=user_id, test_id=test_id
     )

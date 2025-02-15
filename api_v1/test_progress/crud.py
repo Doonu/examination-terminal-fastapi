@@ -26,27 +26,6 @@ async def get_list_test_progress_in_course(
     return list(test_progress_list)
 
 
-async def get_test_progress(
-    test_id: int, course_id: int, user_id: int, session: AsyncSession
-):
-    state = (
-        select(TestProgress)
-        .where(TestProgress.test_id == test_id)
-        .where(TestProgress.course_id == course_id)
-        .where(TestProgress.participant_id == user_id)
-        .options(selectinload(TestProgress.result_test))
-    )
-    results = await session.scalars(state)
-    test_progress = next(results, None)
-
-    if test_progress is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Прогресс теста не найден"
-        )
-
-    return test_progress
-
-
 async def get_list_test_progress(user_id: int, filter_date: int, session: AsyncSession):
     state = (
         select(TestProgress)

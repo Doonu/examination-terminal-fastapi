@@ -19,6 +19,10 @@ class Test(TestBase):
     id: int
 
 
+class TestInCourse(Test):
+    access_test: bool
+
+
 class ResultTest(BaseModel):
     text_question: str
     options: List[str]

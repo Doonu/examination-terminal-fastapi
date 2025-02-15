@@ -2,7 +2,7 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, field_validator
 
-from api_v1.course_test.schemas import Test
+from api_v1.course_test.schemas import Test, TestInCourse
 from api_v1.profile.schemas import ProfileGet
 
 
@@ -37,6 +37,10 @@ class CourseGet(Course):
         if not value:
             return []
         return [assoc.test for assoc in value]
+
+
+class CourseItemGet(CourseGet):
+    tests: Optional[list[TestInCourse]]
 
 
 class CourseUpdatePartial(BaseModel):

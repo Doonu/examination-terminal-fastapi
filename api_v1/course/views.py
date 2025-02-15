@@ -8,7 +8,7 @@ from api_v1.auth.decorators import role_required
 from api_v1.auth.dependencies import get_user_id_in_access_token
 from api_v1.course import crud as course_crud
 from api_v1.course.dependencies import get_course_by_id
-from api_v1.course.schemas import CourseGet, CourseUpdatePartial
+from api_v1.course.schemas import CourseGet, CourseUpdatePartial, CourseItemGet
 from core.models import db_helper
 
 http_bearer = HTTPBearer()
@@ -22,9 +22,14 @@ async def get_course(
     direction: Optional[int] = Query(None),
     user_id: int = Depends(get_user_id_in_access_token),
     session: AsyncSession = Depends(db_helper.scoped_session_dependency),
-
 ):
-    return await course_crud.get_list_course(session=session, user_id=user_id, search=search, direct=direction, sort_by=sort_by)
+    return await course_crud.get_list_course(
+        session=session,
+        user_id=user_id,
+        search=search,
+        direct=direction,
+        sort_by=sort_by,
+    )
 
 
 @router.post("/")
@@ -41,7 +46,7 @@ async def create_course(
     )
 
 
-@router.get("/{course_id}", response_model=CourseGet)
+@router.get("/{course_id}", response_model=CourseItemGet)
 async def get_item_course(
     course: CourseGet = Depends(get_course_by_id),
 ):
