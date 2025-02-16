@@ -78,11 +78,11 @@ async def access_activation(
         )
         session.add(test_progress)
 
-        dt_local = datetime.datetime.fromtimestamp(deadline_date, pytz.utc)
+        await session.commit()
         scheduler.add_job(
             scheduled_test_progress_overdue,
             trigger="date",
-            run_date=dt_local,
+            run_date=deadline_date,
             args=[test_progress.id],
         )
 

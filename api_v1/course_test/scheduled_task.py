@@ -1,3 +1,5 @@
+import time
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api_v1.test_progress.dependencies import get_progress_test
@@ -10,6 +12,11 @@ async def scheduled_test_progress_overdue(progress_test_id):
     test_progress = await get_progress_test(
         session=session, progress_test_id=progress_test_id
     )
+
+    if test_progress.deadline_date <= int(time.time()):
+        test_progress.status = 4
+        await session.commit()
+        return test_progress
 
     if test_progress.status == 3:
         return
